@@ -36,14 +36,14 @@ resource "aws_s3_bucket_website_configuration" "static_website" {
 
 # Wait for public access block settings to propagate
 resource "time_sleep" "wait_for_public_access_block" {
-  depends_on = [aws_s3_bucket_public_access_block.static_website]
+  depends_on      = [aws_s3_bucket_public_access_block.static_website]
   create_duration = "10s"
 }
 
 # Add bucket policy
 resource "aws_s3_bucket_policy" "static_website" {
   depends_on = [time_sleep.wait_for_public_access_block]
-  bucket = aws_s3_bucket.static_website.id
+  bucket     = aws_s3_bucket.static_website.id
 
   policy = jsonencode({
     Version = "2012-10-17"
