@@ -68,26 +68,37 @@ jobs:
           terraform fmt -check -recursive
 
       - name: Terraform Init
+        id: init
         run: |
           cd $TERRAFORM_DIR
-          terraform init
+          terraform init -input=false -backend=true \
+            -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -backend-config="secret_key=${{ secrets.AWS_SECRET_KEY }}" \
+            -backend-config="region=${{ secrets.AWS_REGION }}"
 
       - name: Terraform Validate
+        id: validate
         run: |
           cd $TERRAFORM_DIR
           terraform validate
+
       - name: Terraform Plan
         id: plan
         run: |
           cd $TERRAFORM_DIR
+          # Remove any existing tfplan files
+          rm -f tfplan
+          
+          # Create new plan
           terraform plan \
+            -input=false \
             -var="aws_access_key=${{ secrets.AWS_ACCESS_KEY }}" \
             -var="aws_secret_key=${{ secrets.AWS_SECRET_KEY }}" \
             -var="bucket_name=${{ secrets.BUCKET_NAME }}" \
             -var="ami_id=ami-09b0a86a2c84101e1" \
             -var="key_name=${{ secrets.KEY_NAME }}" \
             -var="admin_ip=${{ secrets.ADMIN_IP }}" \
-            -var="environment=${{ github.event.inputs.environment }}" \
+            -var="environment=${{ github.event.inputs.environment || 'development' }}" \
             -out=tfplan
 
       - name: Upload Terraform Plan
@@ -116,6 +127,15 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.5.0"
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: |
+          cd $TERRAFORM_DIR
+          terraform init -input=false -backend=true \
+            -backend-config="access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -backend-config="secret_key=${{ secrets.AWS_SECRET_KEY }}" \
+            -backend-config="region=${{ secrets.AWS_REGION }}"
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v3
