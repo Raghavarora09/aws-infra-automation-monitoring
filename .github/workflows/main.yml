@@ -76,12 +76,13 @@ jobs:
         run: |
           cd $TERRAFORM_DIR
           terraform validate
-
       - name: Terraform Plan
         id: plan
         run: |
           cd $TERRAFORM_DIR
           terraform plan \
+            -var="aws_access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -var="aws_secret_key=${{ secrets.AWS_SECRET_KEY }}" \
             -var="bucket_name=${{ secrets.BUCKET_NAME }}" \
             -var="ami_id=ami-09b0a86a2c84101e1" \
             -var="key_name=${{ secrets.KEY_NAME }}" \
