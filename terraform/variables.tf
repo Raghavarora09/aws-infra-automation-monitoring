@@ -3,18 +3,16 @@ variable "aws_region" {
   type        = string
   default     = "ap-south-1"
 }
-
 variable "aws_access_key" {
-  description = "AWS access key"
+  description = "AWS Access Key"
   type        = string
-  sensitive   = true
 }
 
 variable "aws_secret_key" {
-  description = "AWS secret key"
+  description = "AWS Secret Key"
   type        = string
-  sensitive   = true
 }
+
 
 variable "bucket_name" {
   description = "Name of the S3 bucket"
@@ -35,4 +33,9 @@ variable "admin_ip" {
 variable "ami_id" {
   description = "AMI ID for EC2 instances"
   default     = "ami-09b0a86a2c84101e1"
+}
+
+variable "environment" {
+  description = "Deployment environment (e.g., development, staging, production)"
+  type        = string
 }
