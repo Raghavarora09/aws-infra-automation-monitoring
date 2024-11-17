@@ -1,6 +1,5 @@
-# main.tf
 provider "aws" {
-  region     = var.aws_region
+  region = var.aws_region
 }
 
 # S3 Bucket
@@ -52,7 +51,7 @@ resource "aws_s3_bucket_policy" "static_website" {
         Principal = "*"
         Action    = "s3:GetObject"
         Resource  = "${aws_s3_bucket.static_website.arn}/*"
-      },
+      }
     ]
   })
 }
@@ -151,4 +150,3 @@ resource "aws_instance" "monitoring" {
     Role = "prometheus-grafana"
   }
 }
-
