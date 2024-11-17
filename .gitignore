@@ -1,0 +1,56 @@
+# Terraform files
+*.tfvars
+!example.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate.backup
+.terraformrc
+terraform.rc
+
+# SSH Keys and certificates
+*.pem
+*.ppk
+*.key
+*.crt
+keys.txt
+
+# Ansible
+*.retry
+ansible.cfg
+inventory.ini
+host_vars/
+group_vars/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local environment files
+.env
+.env.*
+*.log
+*.tmp
+
+# Monitoring configurations
+monitoring/grafana-dashboard.json
+monitoring/prometheus.yml
+
+# Build outputs
+dist/
+build/
+*.zip
+*.tar.gz

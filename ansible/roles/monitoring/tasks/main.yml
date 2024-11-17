@@ -1,0 +1,28 @@
+# ansible/roles/monitoring/tasks/main.yml
+---
+- name: Install Prometheus
+  apt:
+    name: prometheus
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Configure Prometheus
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+  notify: restart prometheus
+  become: yes
+
+- name: Install Grafana
+  apt:
+    name: grafana
+    state: present
+  become: yes
+
+- name: Start and enable Grafana
+  systemd:
+    name: grafana-server
+    state: started
+    enabled: yes
+  become: yes

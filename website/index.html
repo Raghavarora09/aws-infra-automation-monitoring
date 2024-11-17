@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern DevOps Ecosystem</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-content">
+            <h1><i class="fas fa-infinity"></i> DevOps Ecosystem</h1>
+            <p class="tagline">Empowering Continuous Integration & Delivery</p>
+            <div class="hero-buttons">
+                <a href="#tools" class="btn primary">Explore Tools</a>
+                <a href="#about" class="btn secondary">Learn More</a>
+            </div>
+        </div>
+        <div class="hero-waves">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                <path fill="#ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+        </div>
+    </header>
+
+    <nav id="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <i class="fas fa-code-branch"></i>
+                <span>DevOps</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#version-control">Version Control</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#monitoring">Monitoring</a></li>
+                <li><a href="#automation">Automation</a></li>
+            </ul>
+            <button class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="version-control" class="tools-section">
+            <h2><i class="fas fa-code-branch"></i> Version Control</h2>
+            <div class="tools-grid">
+                <div class="tool-card" data-tool="git">
+                    <div class="tool-icon">
+                        <i class="fab fa-git-alt"></i>
+                    </div>
+                    <h3>Git</h3>
+                    <p>Distributed version control system for tracking changes in source code during software development.</p>
+                    <div class="tool-stats">
+                        <span><i class="fas fa-star"></i> Most Popular</span>
+                        <span><i class="fas fa-clock"></i> Real-time</span>
+                    </div>
+                    <button class="learn-more">Learn More</button>
+                </div>
+                <div class="tool-card" data-tool="github">
+                    <div class="tool-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <h3>GitHub</h3>
+                    <p>Web-based hosting service for version control and collaboration platform for developers.</p>
+                    <div class="tool-stats">
+                        <span><i class="fas fa-users"></i> Collaborative</span>
+                        <span><i class="fas fa-cloud"></i> Cloud-based</span>
+                    </div>
+                    <button class="learn-more">Learn More</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="configuration" class="tools-section">
+            <h2><i class="fas fa-cogs"></i> Configuration Management</h2>
+            <div class="tools-grid">
+                <div class="tool-card" data-tool="ansible">
+                    <div class="tool-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Ansible</h3>
+                    <p>Agentless automation tool for configuration management and application deployment.</p>
+                    <div class="tool-stats">
+                        <span><i class="fas fa-bolt"></i> Agentless</span>
+                        <span><i class="fas fa-feather"></i> Lightweight</span>
+                    </div>
+                    <button class="learn-more">Learn More</button>
+                </div>
+                <div class="tool-card" data-tool="puppet">
+                    <div class="tool-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <h3>Puppet</h3>
+                    <p>Configuration management tool for automating infrastructure and application management.</p>
+                    <div class="tool-stats">
+                        <span><i class="fas fa-shield-alt"></i> Enterprise</span>
+                        <span><i class="fas fa-check-circle"></i> Reliable</span>
+                    </div>
+                    <button class="learn-more">Learn More</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="monitoring" class="tools-section">
+            <h2><i class="fas fa-chart-line"></i> Monitoring & Visualization</h2>
+            <div class="tools-grid">
+                <div class="tool-card" data-tool="prometheus">
+                    <div class="tool-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h3>Prometheus</h3>
+                    <p>Open-source monitoring and alerting toolkit designed for reliability and scalability.</p>
+                    <div class="tool-stats">
+                        <span><i class="fas fa-chart-bar"></i> Metrics</span>
+                        <span><i class="fas fa-bell"></i> Alerting</span>
+                    </div>
+                    <button class="learn-more">Learn More</button>
+                </div>
+                <div class="tool-card" data-tool="grafana">
+                    <div class="tool-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Grafana</h3>
+                    <p>Analytics and interactive visualization platform for metrics and logs.</p>
+                    <div class="tool-stats">
+                        <span><i class="fas fa-palette"></i> Visualize</span>
+                        <span><i class="fas fa-database"></i> Multi-source</span>
+                    </div>
+                    <button class="learn-more">Learn More</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="toolModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header">
+                <i class="tool-icon"></i>
+                <h2></h2>
+            </div>
+            <div class="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-infinity"></i> DevOps Ecosystem</h3>
+                <p>Empowering modern software development and operations with cutting-edge tools and practices.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#version-control">Version Control</a></li>
+                    <li><a href="#configuration">Configuration</a></li>
+                    <li><a href="#monitoring">Monitoring</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 DevOps Ecosystem. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

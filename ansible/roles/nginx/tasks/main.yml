@@ -1,0 +1,41 @@
+# ansible/roles/nginx/tasks/main.yml
+---
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Configure nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+  become: yes
+
+- name: Upload website files to S3
+  amazon.aws.s3_sync:
+    bucket: "{{ s3_bucket_name }}"
+    file_root: "{{ playbook_dir }}/../website/"
+    permission: public-read
+  delegate_to: localhost
+
+- name: Create website directory
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Download website from S3
+  aws_s3:
+    bucket: "{{ s3_bucket_name }}"
+    object: "{{ item }}"
+    dest: "/var/www/html/{{ item }}"
+    mode: get
+  become: yes
+  with_items:
+    - index.html
+    - styles.css
+    - script.js

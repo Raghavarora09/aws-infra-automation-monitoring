@@ -1,0 +1,9 @@
+# playbook.yml
+---
+- hosts: role_nginx
+  roles:
+    - nginx
+
+- hosts: role_prometheus-grafana
+  roles:
+    - monitoring
