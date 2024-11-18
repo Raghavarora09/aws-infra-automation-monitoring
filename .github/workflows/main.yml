@@ -142,77 +142,78 @@ jobs:
         run: |
           cd ${{ env.TERRAFORM_DIR }}
           terraform apply -auto-approve tfplan
-configure-infrastructure:
-  needs: terraform-apply
-  runs-on: ubuntu-latest
-  if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-  steps:
-    - uses: actions/checkout@v3
-    - name: Add SSH private key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        eval $(ssh-agent -s)
-        ssh-add ~/.ssh/id_rsa
-        ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: pip
-    - name: Install Python Dependencies
-      working-directory: ${{ env.ANSIBLE_DIR }}
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Install AWS Collection
-      run: |
-        ansible-galaxy collection install amazon.aws
-    - name: Add SSH Key
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - name: Create Ansible Config File
-      run: >
-        echo "[defaults]
-
-        inventory = inventory/aws_ec2.yml
-
-        host_key_checking = False
-
-        timeout = 60
-
-        remote_user = ec2-user
-
-        private_key_file = ~/.ssh/id_rsa
-
-
-        [ssh_connection]
-
-        ssh_args = -o StrictHostKeyChecking=no -o ControlMaster=auto -o ControlPersist=60s" > ansible/ansible.cfg
-    - name: Wait for EC2 Instances
-      run: sleep 180
-    - name: Run Ansible Playbook
-      working-directory: ${{ env.ANSIBLE_DIR }}
-      run: |
-        ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
-      env:
-        ANSIBLE_HOST_KEY_CHECKING: false
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-        ANSIBLE_PYTHON_INTERPRETER: auto_silent
-    - name: Notify Failure
-      if: ${{ failure() }}
-      uses: slackapi/slack-github-action@v1.24.0
-      with:
-        channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-        slack-message: "❌ Infrastructure deployment failed! Environment: ${{
-          github.event.inputs.environment }}"
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+  configure-infrastructure:
+    needs: terraform-apply
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Add SSH private key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
+          ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Install Python Dependencies
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Install AWS Collection
+        run: |
+          ansible-galaxy collection install amazon.aws
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Create Ansible Config File
+        run: >
+          echo "[defaults]
+  
+          inventory = inventory/aws_ec2.yml
+  
+          host_key_checking = False
+  
+          timeout = 60
+  
+          remote_user = ec2-user
+  
+          private_key_file = ~/.ssh/id_rsa
+  
+  
+          [ssh_connection]
+  
+          ssh_args = -o StrictHostKeyChecking=no -o ControlMaster=auto -o ControlPersist=60s" > ansible/ansible.cfg
+      - name: Wait for EC2 Instances
+        run: sleep 180
+      - name: Run Ansible Playbook
+        working-directory: ${{ env.ANSIBLE_DIR }}
+        run: |
+          ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: false
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          ANSIBLE_PYTHON_INTERPRETER: auto_silent
+      - name: Notify Failure
+        if: ${{ failure() }}
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          slack-message: "❌ Infrastructure deployment failed! Environment: ${{
+            github.event.inputs.environment }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+  
