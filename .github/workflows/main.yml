@@ -154,17 +154,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip'
-          cache-dependency-path: '${{ env.ANSIBLE_DIR }}/requirements.txt'
 
       - name: Install Ansible and Dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f "${{ env.ANSIBLE_DIR }}/requirements.txt" ]; then
-            pip install -r "${{ env.ANSIBLE_DIR }}/requirements.txt"
-          else
-            pip install ansible boto3 botocore requests
-          fi
+          pip install ansible boto3 botocore requests
 
       - name: Wait for EC2 Instances
         run: sleep 60
