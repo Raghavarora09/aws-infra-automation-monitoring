@@ -191,7 +191,7 @@ jobs:
           ansible-galaxy collection install amazon.aws
 
       - name: Wait for EC2 Instances
-        run: sleep 60
+        run: sleep 180
 
       - name: Run Ansible Playbook
         working-directory: ${{ env.ANSIBLE_DIR }}
@@ -210,7 +210,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: False
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
           ANSIBLE_PYTHON_INTERPRETER: auto_silent
-
+          
   notify:
     needs: [terraform-apply, configure-infrastructure]
     runs-on: ubuntu-latest
