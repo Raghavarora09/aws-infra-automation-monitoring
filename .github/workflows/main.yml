@@ -155,6 +155,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           eval $(ssh-agent -s)
           ssh-add ~/.ssh/id_rsa
+          cd ansible
           ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -182,20 +183,20 @@ jobs:
       - name: Create Ansible Config File
         run: >
           echo "[defaults]
-  
+
           inventory = inventory/aws_ec2.yml
-  
+
           host_key_checking = False
-  
+
           timeout = 60
-  
+
           remote_user = ec2-user
-  
+
           private_key_file = ~/.ssh/id_rsa
-  
-  
+
+
           [ssh_connection]
-  
+
           ssh_args = -o StrictHostKeyChecking=no -o ControlMaster=auto -o ControlPersist=60s" > ansible/ansible.cfg
       - name: Wait for EC2 Instances
         run: sleep 180
@@ -216,4 +217,3 @@ jobs:
             github.event.inputs.environment }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-  
