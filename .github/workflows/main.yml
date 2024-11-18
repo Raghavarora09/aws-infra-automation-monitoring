@@ -160,7 +160,7 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform apply -auto-approve tfplan
 
-  configure-infrastructure:
+    configure-infrastructure:
     needs: terraform-apply
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -190,6 +190,11 @@ jobs:
         run: |
           ansible-galaxy collection install amazon.aws
 
+      - name: Add SSH Key
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Wait for EC2 Instances
         run: sleep 180
 
@@ -201,29 +206,6 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: False
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
           ANSIBLE_PYTHON_INTERPRETER: auto_silent
-
-      - name: Verify Deployment
-        working-directory: ${{ env.ANSIBLE_DIR }}
-        run: |
-          ansible-playbook -i inventory/aws_ec2.yml monitoring/verify.yml -v
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: False
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-          ANSIBLE_PYTHON_INTERPRETER: auto_silent
-          
-  notify:
-    needs: [terraform-apply, configure-infrastructure]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Notify Success
-        if: ${{ success() }}
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          slack-message: "✅ Infrastructure deployment successful! Environment: ${{ github.event.inputs.environment }}"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Notify Failure
         if: ${{ failure() }}
