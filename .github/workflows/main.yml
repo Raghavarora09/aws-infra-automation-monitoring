@@ -155,11 +155,16 @@ jobs:
         with:
           python-version: '3.10'
           cache: 'pip'
+          cache-dependency-path: '${{ env.ANSIBLE_DIR }}/requirements.txt'
 
       - name: Install Ansible and Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ansible boto3 botocore requests
+          if [ -f "${{ env.ANSIBLE_DIR }}/requirements.txt" ]; then
+            pip install -r "${{ env.ANSIBLE_DIR }}/requirements.txt"
+          else
+            pip install ansible boto3 botocore requests
+          fi
 
       - name: Wait for EC2 Instances
         run: sleep 60
@@ -167,7 +172,9 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           cd ${{ env.ANSIBLE_DIR }}
-          ansible-galaxy install -r requirements.yml
+          if [ -f "requirements.yml" ]; then
+            ansible-galaxy install -r requirements.yml
+          fi
           ansible-playbook -i inventory/aws_ec2.yml playbook.yml
 
       - name: Verify Deployment
