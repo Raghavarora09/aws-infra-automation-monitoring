@@ -215,3 +215,4 @@ jobs:
           slack-message: "❌ Infrastructure deployment failed! Environment: ${{ github.event.inputs.environment }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          
