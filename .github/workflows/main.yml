@@ -78,6 +78,29 @@ jobs:
           cd $TERRAFORM_DIR
           terraform validate
 
+      - name: Check Existing Infrastructure
+        id: check-infra
+        run: |
+          cd $TERRAFORM_DIR
+          if terraform state list > /dev/null 2>&1; then
+            echo "has_infrastructure=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_infrastructure=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terraform Destroy Existing Infrastructure
+        if: steps.check-infra.outputs.has_infrastructure == 'true'
+        run: |
+          cd $TERRAFORM_DIR
+          terraform destroy -auto-approve \
+            -var="aws_access_key=${{ secrets.AWS_ACCESS_KEY }}" \
+            -var="aws_secret_key=${{ secrets.AWS_SECRET_KEY }}" \
+            -var="bucket_name=${{ secrets.BUCKET_NAME }}" \
+            -var="ami_id=ami-09b0a86a2c84101e1" \
+            -var="key_name=${{ secrets.KEY_NAME }}" \
+            -var="admin_ip=${{ secrets.ADMIN_IP }}" \
+            -var="environment=${{ github.event.inputs.environment }}"
+
       - name: Terraform Plan
         id: plan
         run: |
@@ -157,32 +180,14 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Verify Ansible Directory and Requirements
-        run: |
-          if [ ! -d "${{ env.ANSIBLE_DIR }}" ]; then
-            echo "Ansible directory not found!"
-            exit 1
-          fi
-          if [ ! -f "${{ env.ANSIBLE_DIR }}/requirements.txt" ]; then
-            echo "requirements.txt not found in ansible directory!"
-            exit 1
-          fi
-
       - name: Install Python Dependencies
         working-directory: ${{ env.ANSIBLE_DIR }}
         run: |
           python -m pip install --upgrade pip
-          # Install both general Python requirements and AWS-specific modules
           pip install -r requirements.txt
-          pip install boto3 botocore
 
-      - name: Install Ansible Galaxy Requirements
+      - name: Install AWS Collection
         run: |
-          cd ${{ env.ANSIBLE_DIR }}
-          if [ -f "requirements.yml" ]; then
-            ansible-galaxy install -r requirements.yml
-          fi
-          # Ensure AWS collection is installed
           ansible-galaxy collection install amazon.aws
 
       - name: Wait for EC2 Instances
