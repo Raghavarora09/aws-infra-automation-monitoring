@@ -54,3 +54,6 @@ dist/
 build/
 *.zip
 *.tar.gz
+
+
+infrastructure-workflow.mermaid
