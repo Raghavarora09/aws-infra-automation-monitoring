@@ -195,6 +195,18 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Create Ansible Config File
+        run: |
+          echo "[defaults]
+          inventory = inventory/aws_ec2.yml
+          host_key_checking = False
+          timeout = 60
+          remote_user = ec2-user
+          private_key_file = ~/.ssh/id_rsa
+
+          [ssh_connection]
+          ssh_args = -o StrictHostKeyChecking=no -o ControlMaster=auto -o ControlPersist=60s" > ansible/ansible.cfg
+
       - name: Wait for EC2 Instances
         run: sleep 180
 

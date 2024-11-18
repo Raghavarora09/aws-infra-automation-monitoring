@@ -63,7 +63,12 @@ resource "aws_s3_bucket_versioning" "static_website" {
   }
 }
 
-# Security Groups
+variable "allowed_ips" {
+  description = "List of allowed IP addresses for SSH and monitoring access"
+  default     = ["0.0.0.0/0"]  # Use for testing, replace with GitHub Actions IPs or specific admin IPs in production
+}
+
+# Web Server Security Group
 resource "aws_security_group" "web_server" {
   name        = "web-server-sg"
   description = "Security group for web server"
@@ -79,7 +84,7 @@ resource "aws_security_group" "web_server" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.admin_ip]
+    cidr_blocks = var.allowed_ips
   }
 
   egress {
@@ -90,6 +95,7 @@ resource "aws_security_group" "web_server" {
   }
 }
 
+# Monitoring Security Group
 resource "aws_security_group" "monitoring" {
   name        = "monitoring-sg"
   description = "Security group for Prometheus and Grafana"
@@ -98,21 +104,21 @@ resource "aws_security_group" "monitoring" {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = [var.admin_ip]
+    cidr_blocks = var.allowed_ips
   }
 
   ingress {
     from_port   = 3000
     to_port     = 3000
     protocol    = "tcp"
-    cidr_blocks = [var.admin_ip]
+    cidr_blocks = var.allowed_ips
   }
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.admin_ip]
+    cidr_blocks = var.allowed_ips
   }
 
   egress {
@@ -122,7 +128,6 @@ resource "aws_security_group" "monitoring" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 # EC2 Instances
 resource "aws_instance" "web_server" {
   ami           = var.ami_id
