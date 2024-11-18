@@ -157,10 +157,24 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
+      - name: Verify Ansible Directory and Requirements
+        run: |
+          if [ ! -d "${{ env.ANSIBLE_DIR }}" ]; then
+            echo "Ansible directory not found!"
+            exit 1
+          fi
+          if [ ! -f "${{ env.ANSIBLE_DIR }}/requirements.txt" ]; then
+            echo "requirements.txt not found in ansible directory!"
+            exit 1
+          fi
+
       - name: Install Python Dependencies
+        working-directory: ${{ env.ANSIBLE_DIR }}
         run: |
           python -m pip install --upgrade pip
+          # Install both general Python requirements and AWS-specific modules
           pip install -r requirements.txt
+          pip install boto3 botocore
 
       - name: Install Ansible Galaxy Requirements
         run: |
@@ -168,25 +182,29 @@ jobs:
           if [ -f "requirements.yml" ]; then
             ansible-galaxy install -r requirements.yml
           fi
+          # Ensure AWS collection is installed
+          ansible-galaxy collection install amazon.aws
 
       - name: Wait for EC2 Instances
         run: sleep 60
 
       - name: Run Ansible Playbook
+        working-directory: ${{ env.ANSIBLE_DIR }}
         run: |
-          cd ${{ env.ANSIBLE_DIR }}
-          ansible-playbook -i inventory/aws_ec2.yml playbook.yml
+          ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          ANSIBLE_PYTHON_INTERPRETER: auto_silent
 
       - name: Verify Deployment
+        working-directory: ${{ env.ANSIBLE_DIR }}
         run: |
-          cd ${{ env.ANSIBLE_DIR }}
-          ansible-playbook -i inventory/aws_ec2.yml monitoring/verify.yml
+          ansible-playbook -i inventory/aws_ec2.yml monitoring/verify.yml -v
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          ANSIBLE_PYTHON_INTERPRETER: auto_silent
 
   notify:
     needs: [terraform-apply, configure-infrastructure]
