@@ -7,7 +7,6 @@ resource "aws_s3_bucket" "static_website" {
   bucket        = var.bucket_name
   force_destroy = true
 }
-
 # Disable block public access settings for the bucket
 resource "aws_s3_bucket_public_access_block" "static_website" {
   bucket = aws_s3_bucket.static_website.id
