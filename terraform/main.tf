@@ -65,7 +65,7 @@ resource "aws_s3_bucket_versioning" "static_website" {
 
 variable "allowed_ips" {
   description = "List of allowed IP addresses for SSH and monitoring access"
-  default     = ["0.0.0.0/0"]  # Use for testing, replace with GitHub Actions IPs or specific admin IPs in production
+  default     = ["0.0.0.0/0"] # Use for testing, replace with GitHub Actions IPs or specific admin IPs in production
 }
 
 # Web Server Security Group
