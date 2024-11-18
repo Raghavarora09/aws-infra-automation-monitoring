@@ -76,6 +76,7 @@ jobs:
         run: |
           cd $TERRAFORM_DIR
           terraform validate
+
       - name: Terraform Plan
         id: plan
         run: |
@@ -90,11 +91,13 @@ jobs:
             -var="environment=${{ github.event.inputs.environment }}" \
             -out=tfplan
 
-      - name: Upload Terraform Plan
+      - name: Upload Terraform Plan and Lock File
         uses: actions/upload-artifact@v3
         with:
-          name: tfplan
-          path: ${{ env.TERRAFORM_DIR }}/tfplan
+          name: terraform-artifacts
+          path: |
+            ${{ env.TERRAFORM_DIR }}/tfplan
+            ${{ env.TERRAFORM_DIR }}/.terraform.lock.hcl
           retention-days: 5
 
   terraform-apply:
@@ -117,11 +120,16 @@ jobs:
         with:
           terraform_version: "1.5.0"
 
-      - name: Download Terraform Plan
+      - name: Download Terraform Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: tfplan
+          name: terraform-artifacts
           path: ${{ env.TERRAFORM_DIR }}
+
+      - name: Terraform Init
+        run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          terraform init
 
       - name: Terraform Apply
         run: |
