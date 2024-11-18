@@ -160,7 +160,7 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform apply -auto-approve tfplan
 
-    configure-infrastructure:
+  configure-infrastructure:
     needs: terraform-apply
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -215,4 +215,3 @@ jobs:
           slack-message: "❌ Infrastructure deployment failed! Environment: ${{ github.event.inputs.environment }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          
