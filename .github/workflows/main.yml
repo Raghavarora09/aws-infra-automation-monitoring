@@ -67,6 +67,7 @@ jobs:
         run: |
           cd $TERRAFORM_DIR
           terraform fmt -check -recursive
+          terraform fmt -recursive
 
       - name: Terraform Init
         run: |
@@ -160,12 +161,21 @@ jobs:
           cd ${{ env.TERRAFORM_DIR }}
           terraform apply -auto-approve tfplan
 
-  configure-infrastructure:
+configure-infrastructure:
     needs: terraform-apply
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
+
+      - name: Add SSH private key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
+          ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
