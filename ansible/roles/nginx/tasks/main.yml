@@ -1,3 +1,4 @@
+# ansible/roles/nginx/tasks/main.yml
 ---
 - name: Install nginx
   apt:
@@ -12,13 +13,6 @@
     dest: /etc/nginx/nginx.conf
   notify: restart nginx
   become: yes
-
-- name: Upload website files to S3
-  amazon.aws.s3_sync:
-    bucket: "{{ s3_bucket_name }}"
-    file_root: "{{ playbook_dir }}/../website/"
-    permission: public-read
-  delegate_to: localhost
 
 - name: Create website directory
   file:
