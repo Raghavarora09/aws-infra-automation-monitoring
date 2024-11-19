@@ -29,7 +29,7 @@
 
 - name: Copy website files
   copy:
-    src: /tmp/website/aws-infra-automation-monitoring/website/
+    src: /tmp/website/website/
     dest: /var/www/html/
     owner: nginx
     group: nginx
