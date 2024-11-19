@@ -31,9 +31,8 @@ http {
     index index.html index.htm index.nginx-debian.html;
 
     server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
-        server_name _;
+        listen 80;
+        server_name example.com;
 
         root /var/www/html;
         index index.html;
