@@ -190,7 +190,7 @@ jobs:
 
           timeout = 60
 
-          remote_user = ec2-user
+          remote_user = ubuntu
 
           private_key_file = ~/.ssh/id_rsa
 
