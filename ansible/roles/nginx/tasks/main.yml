@@ -1,4 +1,3 @@
-# ansible/roles/nginx/tasks/main.yml
 ---
 - name: Install nginx
   apt:
@@ -19,6 +18,32 @@
     path: /var/www/html
     state: directory
     mode: '0755'
+  become: yes
+
+- name: Clone website repository
+  git:
+    repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
+    dest: /tmp/website
+    version: main
+  become: yes
+
+- name: Copy website files
+  copy:
+    src: /tmp/website/website/
+    dest: /var/www/html/
+    owner: nginx
+    group: nginx
+    mode: '0644'
+  become: yes
+
+- name: Upload website files to S3 bucket
+  amazon.aws.aws_s3:
+    bucket: "{{ s3_bucket_name }}"
+    object: "{{ item }}"
+    src: "/tmp/website/{{ item }}"
+    mode: put
+  with_fileglob:
+    - /tmp/website/*
   become: yes
 
 - name: Download website files from S3

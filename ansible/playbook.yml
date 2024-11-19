@@ -7,3 +7,9 @@
 - hosts: role_prometheus-grafana
   roles:
     - monitoring
+
+- hosts: all
+  vars:
+    s3_bucket_name: int-333
+  roles:
+    - nginx
