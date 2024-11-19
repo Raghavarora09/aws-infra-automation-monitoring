@@ -22,7 +22,8 @@
 - name: Clone website repository directly to web root
   git:
     repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
-    dest: /var/www/
+    dest: /var/www/html
+    force: yes
     version: main
     depth: 1
   become: yes
