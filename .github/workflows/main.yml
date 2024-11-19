@@ -203,6 +203,7 @@ jobs:
       - name: Run Ansible Playbook
         working-directory: ${{ env.ANSIBLE_DIR }}
         run: |
+          cd ansible
           ansible-playbook -i inventory/aws_ec2.yml playbook.yml -v
         env:
           ANSIBLE_HOST_KEY_CHECKING: false
