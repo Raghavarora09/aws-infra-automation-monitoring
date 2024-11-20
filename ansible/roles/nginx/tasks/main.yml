@@ -34,11 +34,11 @@
     depth: 1
   become: yes
 
-- name: Set correct ownership and permissions
+  - name: Set correct ownership and permissions
   file:
     path: /var/www/html
-    owner: nginx
-    group: nginx
+    owner: www-data
+    group: www-data
     recurse: yes
     mode: 'u=rwX,go=rX'
   become: yes
