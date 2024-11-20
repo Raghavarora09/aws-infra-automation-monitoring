@@ -34,7 +34,7 @@
     depth: 1
   become: yes
 
-  - name: Set correct ownership and permissions
+- name: Set correct ownership and permissions
   file:
     path: /var/www/html
     owner: www-data
