@@ -1,65 +1,52 @@
----
-- name: Nginx Installation and Configuration
-  hosts: "{{ target_hosts | default('all') }}"
-  run_once: true  # This ensures the play only runs once
-  tasks:
-    - name: Install nginx
-      apt:
-        name: nginx
-        state: present
-        update_cache: yes
-      become: yes
-      register: nginx_install
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+  become: yes
+  register: nginx_install
 
-    - name: Stop nginx service before configuration
-      service:
-        name: nginx
-        state: stopped
-      become: yes
-      when: nginx_install.changed
+- name: Stop nginx service before configuration
+  service:
+    name: nginx
+    state: stopped
+  become: yes
+  when: nginx_install.changed
 
-    - name: Ensure /var/www exists
-      file:
-        path: /var/www
-        state: directory
-        mode: '0755'
-      become: yes
-      register: www_dir
+- name: Ensure /var/www exists
+  file:
+    path: /var/www
+    state: directory
+    mode: '0755'
+  become: yes
 
-    - name: Remove existing html directory
-      file:
-        path: /var/www/html
-        state: absent
-      become: yes
-      when: www_dir.changed
+- name: Remove existing html directory if present
+  file:
+    path: /var/www/html
+    state: absent
+  become: yes
 
-    - name: Clone website repository to /var/www
-      git:
-        repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
-        dest: /var/www
-        force: yes
-        version: main
-        depth: 1
-      become: yes
-      register: git_clone
-      ignore_errors: yes
-      when: www_dir.changed or nginx_install.changed
+- name: Clone website repository to /var/www
+  git:
+    repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
+    dest: /var/www
+    force: no
+    version: main
+    depth: 1
+  become: yes
+  ignore_errors: no
 
-    - name: Set correct ownership and permissions
-      file:
-        path: /var/www
-        owner: www-data
-        group: www-data
-        recurse: yes
-        mode: 'u=rwX,go=rX'
-      become: yes
-      when: git_clone is success
+- name: Set correct ownership and permissions
+  file:
+    path: /var/www
+    owner: www-data
+    group: www-data
+    recurse: yes
+    mode: 'u=rwX,go=rX'
+  become: yes
 
-    - name: Restart nginx
-      service:
-        name: nginx
-        state: restarted
-      become: yes
-      when: git_clone is success
-
-    - meta: end_play  # This will end the playbook after completing these tasks
+- name: Start nginx
+  service:
+    name: nginx
+    state: started
+  become: yes
