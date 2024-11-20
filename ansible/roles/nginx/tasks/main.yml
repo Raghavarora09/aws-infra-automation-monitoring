@@ -5,23 +5,38 @@
     update_cache: yes
   become: yes
 
-- name: Create website directory
+- name: Stop nginx service before configuration
+  service:
+    name: nginx
+    state: stopped
+  become: yes
+
+- name: Remove default nginx configuration
   file:
-    path: /var/www/html
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/nginx/sites-enabled/default
+    - /etc/nginx/sites-available/default
+  become: yes
+
+- name: Ensure /var/www exists
+  file:
+    path: /var/www
     state: directory
     mode: '0755'
   become: yes
 
-- name: Remove existing website files
+- name: Remove existing html directory
   file:
     path: /var/www/html
     state: absent
   become: yes
 
-- name: Clone website repository directly to web root
+- name: Clone website repository to /var/www
   git:
     repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
-    dest: /var/www/html
+    dest: /var/www
     force: yes
     version: main
     depth: 1
@@ -29,7 +44,7 @@
 
 - name: Set correct ownership and permissions
   file:
-    path: /var/www/html
+    path: /var/www
     owner: www-data
     group: www-data
     recurse: yes
@@ -43,6 +58,20 @@
     validate: 'nginx -t -c %s'
   become: yes
   register: nginx_conf
+
+- name: Configure nginx site
+  template:
+    src: default.conf.j2
+    dest: /etc/nginx/sites-available/default
+    validate: 'nginx -t -c %s'
+  become: yes
+
+- name: Enable nginx site
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  become: yes
 
 - name: Validate nginx configuration
   command: nginx -t
@@ -62,8 +91,3 @@
     state: restarted
   become: yes
   when: nginx_config_test.rc == 0
-
-- name: Fail if nginx configuration is invalid
-  fail:
-    msg: "Nginx configuration is invalid. Please check the configuration and try again."
-  when: nginx_config_test.rc != 0

@@ -1,4 +1,4 @@
-user nginx;
+user www-data;
 worker_processes auto;
 error_log /var/log/nginx/error.log;
 pid /run/nginx.pid;
@@ -34,7 +34,7 @@ http {
     # HTTP Server Block
     server {
         listen 80;
-        server_name example.com;
+        server_name _;  # Changed to catch-all
 
         root /var/www/html;
         index index.html index.htm index.nginx-debian.html;
@@ -43,20 +43,4 @@ http {
             try_files $uri $uri/ =404;
         }
     }
-
-    # HTTPS Server Block (commented out until SSL certificates are ready)
-    #server {
-    #    listen 443 ssl;
-    #    server_name example.com;
-    #
-    #    ssl_certificate /etc/ssl/certs/example.com.crt;
-    #    ssl_certificate_key /etc/ssl/private/example.com.key;
-    #    
-    #    root /var/www/html;
-    #    index index.html;
-    #
-    #    location / {
-    #        try_files $uri $uri/ =404;
-    #    }
-    #}
 }
