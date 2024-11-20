@@ -4,12 +4,14 @@
     state: present
     update_cache: yes
   become: yes
+  register: nginx_install
 
 - name: Stop nginx service before configuration
   service:
     name: nginx
     state: stopped
   become: yes
+  when: nginx_install.changed
 
 - name: Ensure /var/www exists
   file:
@@ -17,12 +19,14 @@
     state: directory
     mode: '0755'
   become: yes
+  register: www_dir
 
 - name: Remove existing html directory
   file:
     path: /var/www/html
     state: absent
   become: yes
+  when: www_dir.changed
 
 - name: Clone website repository to /var/www
   git:
@@ -32,7 +36,11 @@
     version: main
     depth: 1
   become: yes
-  when: not ansible_facts['os_family'] == 'Ununtu'
+  register: git_clone
+  when: 
+    - not ansible_check_mode
+    - www_dir.changed or nginx_install.changed
+  ignore_errors: yes
 
 - name: Set correct ownership and permissions
   file:
@@ -42,10 +50,11 @@
     recurse: yes
     mode: 'u=rwX,go=rX'
   become: yes
+  when: git_clone.changed
 
 - name: Restart nginx
   service:
     name: nginx
     state: restarted
   become: yes
-  when: "'running' not in ansible_facts['ec2_nginx.activeState']"
+  when: git_clone.changed
