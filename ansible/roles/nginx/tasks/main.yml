@@ -5,13 +5,6 @@
     update_cache: yes
   become: yes
 
-- name: Configure nginx
-  template:
-    src: nginx.conf.j2
-    dest: /etc/nginx/nginx.conf
-  notify: restart nginx
-  become: yes
-
 - name: Create website directory
   file:
     path: /var/www/html
@@ -42,3 +35,35 @@
     recurse: yes
     mode: 'u=rwX,go=rX'
   become: yes
+
+- name: Configure nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    validate: 'nginx -t -c %s'
+  become: yes
+  register: nginx_conf
+
+- name: Validate nginx configuration
+  command: nginx -t
+  changed_when: false
+  become: yes
+  register: nginx_config_test
+  ignore_errors: true
+
+- name: Debug nginx configuration test
+  debug:
+    var: nginx_config_test
+  when: nginx_config_test.rc != 0
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: yes
+  when: nginx_config_test.rc == 0
+
+- name: Fail if nginx configuration is invalid
+  fail:
+    msg: "Nginx configuration is invalid. Please check the configuration and try again."
+  when: nginx_config_test.rc != 0
