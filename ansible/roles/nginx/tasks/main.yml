@@ -32,6 +32,7 @@
     version: main
     depth: 1
   become: yes
+  when: not ansible_facts['os_family'] == 'Ununtu'
 
 - name: Set correct ownership and permissions
   file:
@@ -47,3 +48,4 @@
     name: nginx
     state: restarted
   become: yes
+  when: "'running' not in ansible_facts['ec2_nginx.activeState']"
