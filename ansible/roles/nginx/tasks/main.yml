@@ -19,6 +19,12 @@
     mode: '0755'
   become: yes
 
+- name: Remove existing website files
+  file:
+    path: /var/www/html
+    state: absent
+  become: yes
+
 - name: Clone website repository directly to web root
   git:
     repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
