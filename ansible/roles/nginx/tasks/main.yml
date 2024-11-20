@@ -1,93 +1,88 @@
-- name: Install nginx
-  apt:
-    name: nginx
-    state: present
-    update_cache: yes
-  become: yes
-
-- name: Stop nginx service before configuration
-  service:
-    name: nginx
-    state: stopped
-  become: yes
-
-- name: Remove default nginx configuration
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items:
-    - /etc/nginx/sites-enabled/default
-    - /etc/nginx/sites-available/default
-  become: yes
-
-- name: Ensure /var/www exists
-  file:
-    path: /var/www
-    state: directory
-    mode: '0755'
-  become: yes
-
-- name: Remove existing html directory
-  file:
-    path: /var/www/html
-    state: absent
-  become: yes
-
-- name: Clone website repository to /var/www
-  git:
-    repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
-    dest: /var/www
-    force: yes
-    version: main
-    depth: 1
-  become: yes
-
-- name: Set correct ownership and permissions
-  file:
-    path: /var/www
-    owner: www-data
-    group: www-data
-    recurse: yes
-    mode: 'u=rwX,go=rX'
-  become: yes
-
-- name: Configure nginx
-  template:
-    src: nginx.conf.j2
-    dest: /etc/nginx/nginx.conf
-    validate: 'nginx -t -c %s'
-  become: yes
-  register: nginx_conf
-
-- name: Configure nginx site
-  template:
-    src: default.conf.j2
-    dest: /etc/nginx/sites-available/default
-    validate: 'nginx -t -c %s'
-  become: yes
-
-- name: Enable nginx site
-  file:
-    src: /etc/nginx/sites-available/default
-    dest: /etc/nginx/sites-enabled/default
-    state: link
-  become: yes
-
-- name: Validate nginx configuration
-  command: nginx -t
-  changed_when: false
-  become: yes
-  register: nginx_config_test
-  ignore_errors: true
-
-- name: Debug nginx configuration test
-  debug:
-    var: nginx_config_test
-  when: nginx_config_test.rc != 0
-
-- name: Restart nginx
-  service:
-    name: nginx
-    state: restarted
-  become: yes
-  when: nginx_config_test.rc == 0
+---
+- name: Install and configure nginx
+  hosts: all  # You may want to adjust this to match your inventory
+  become: yes # Since most tasks need root, we'll set this at the play level
+  
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      
+    - name: Stop nginx service
+      service:
+        name: nginx
+        state: stopped
+        
+    - name: Remove default nginx configurations
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /etc/nginx/sites-enabled/default
+        - /etc/nginx/sites-available/default
+        
+    - name: Ensure required directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - /etc/nginx/sites-available
+        - /etc/nginx/sites-enabled
+        - /var/www
+        
+    - name: Remove existing html directory
+      file:
+        path: /var/www/html
+        state: absent
+        
+    - name: Clone website repository
+      git:
+        repo: https://github.com/Raghavarora09/aws-infra-automation-monitoring.git
+        dest: /var/www
+        force: yes
+        version: main
+        depth: 1
+        
+    - name: Set website permissions
+      file:
+        path: /var/www
+        owner: www-data
+        group: www-data
+        recurse: yes
+        mode: 'u=rwX,go=rX'
+        
+    - name: Configure nginx main configuration
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        validate: 'nginx -t -c %s'
+      register: main_config
+        
+    - name: Configure nginx site
+      template:
+        src: default.conf.j2
+        dest: /etc/nginx/sites-available/default
+      register: site_config
+        
+    - name: Enable nginx site
+      file:
+        src: /etc/nginx/sites-available/default
+        dest: /etc/nginx/sites-enabled/default
+        state: link
+      register: site_enabled
+        
+    - name: Validate full nginx configuration
+      command: nginx -t
+      changed_when: false
+      register: nginx_config_test
+      failed_when: nginx_config_test.rc != 0
+        
+    - name: Start and enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      when: nginx_config_test.rc == 0
