@@ -3,6 +3,7 @@ worker_processes auto;
 error_log /var/log/nginx/error.log;
 pid /run/nginx.pid;
 
+# Include any modules that are enabled
 include /etc/nginx/modules-enabled/*.conf;
 
 events {
@@ -11,8 +12,8 @@ events {
 
 http {
     log_format main '$remote_addr - $remote_user [$time_local] "$request" '
-                    '$status $body_bytes_sent "$http_referer" '
-                    '"$http_user_agent" "$http_x_forwarded_for"';
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
 
     access_log /var/log/nginx/access.log main;
 
@@ -25,20 +26,55 @@ http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
+    # Enable SSL and configure it properly
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
+    ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384';
 
+    # Recommended: server_name to match your domain or IP
+    server_name example.com;
+
+    # Default root path
+    root /var/www/html;
     index index.html index.htm index.nginx-debian.html;
 
+    # Ensure the configuration has a server block
     server {
         listen 80;
         server_name example.com;
 
+        # Root and index file
         root /var/www/html;
         index index.html;
 
+        # Default route
         location / {
             try_files $uri $uri/ =404;
         }
+
+        # Redirect HTTP to HTTPS (if using SSL)
+        # Uncomment this if you plan to use SSL and want HTTP traffic to be redirected to HTTPS
+        # location / {
+        #     try_files $uri $uri/ =404;
+        # }
     }
+
+    # If SSL is enabled, a second server block for HTTPS would be needed, uncomment this section:
+    #
+    # server {
+    #     listen 443 ssl;
+    #     server_name example.com;
+    #
+    #     ssl_certificate /etc/ssl/certs/example.com.crt;
+    #     ssl_certificate_key /etc/ssl/private/example.com.key;
+    #     ssl_protocols TLSv1.2 TLSv1.3;
+    #     ssl_ciphers 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384';
+    #
+    #     root /var/www/html;
+    #     index index.html;
+    #
+    #     location / {
+    #         try_files $uri $uri/ =404;
+    #     }
+    # }
 }
