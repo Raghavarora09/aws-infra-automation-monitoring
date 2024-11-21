@@ -1,59 +1,26 @@
 stateDiagram-v2
-    [*] --> SecurityChecks : Trigger Workflow
-    SecurityChecks --> TerraformPlan : Passes Security Checks
-    TerraformPlan --> TerraformApply : On main branch
-    TerraformPlan --> [*] : On Pull Request
-    TerraformApply --> ConfigureInfrastructure : Successful Apply
-    ConfigureInfrastructure --> SlackNotification : Deployment Complete
-    SlackNotification --> [*]
-
-    state SecurityChecks {
-        TerraformSecurityScan
-        YAMLLint
-    }
-
-    state TerraformPlan {
-        AWSCredentials
-        TerraformFormat
-        TerraformInit
-        TerraformValidate
-        InfrastructureCheck
-        DestroyExistingInfra
-        CreatePlan
-    }
-
-    state TerraformApply {
-        DownloadArtifacts
-        ApplyTerraformPlan
-    }
-
-    state ConfigureInfrastructure {
-        SSHKeySetup
-        SetupPython
-        InstallDependencies
-        RunAnsiblePlaybook
-    }
-
-    state SlackNotification {
-        SendFailureAlert
-    }
-
+    [*] --> SecurityChecks: Push to Main
+    SecurityChecks --> TerraformPlan: Security Checks Pass
+    TerraformPlan --> TerraformApply: Plan Successful
+    TerraformApply --> ConfigureInfrastructure: Apply Successful
+    ConfigureInfrastructure --> [*]: Deployment Complete
+    
     note right of SecurityChecks
-        Runs security scans
-        on Terraform and YAML
+        Runs security scans on
+        Terraform and Ansible
     end note
-
+    
     note right of TerraformPlan
         Validates and plans
         infrastructure changes
     end note
-
+    
     note right of TerraformApply
         Applies infrastructure
-        only on main branch
+        changes to AWS
     end note
-
+    
     note right of ConfigureInfrastructure
-        Configures EC2 instances
-        using Ansible
+        Configures deployed
+        infrastructure using Ansible
     end note
